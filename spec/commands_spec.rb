@@ -34,7 +34,7 @@ describe TasteTester::Commands do
 
   describe '.run_reverse_tunnels' do
     it 'errors when local taste-tester server is not running' do
-      TasteTester::Config.servers ['host1']
+      TasteTester::Config.servers(['host1'])
       mock_server = instance_double(TasteTester::Server, :port => nil)
       allow(TasteTester::Server).to receive(:new).and_return(mock_server)
       allow(TasteTester::Server).to receive(:running?).and_return(false)
@@ -48,7 +48,7 @@ describe TasteTester::Commands do
     end
 
     it 'starts tunnels and cleans them up on signal' do
-      TasteTester::Config.servers %w{host1 host2}
+      TasteTester::Config.servers(%w{host1 host2})
       mock_server = instance_double(TasteTester::Server, :port => 1234)
       tunnel1 = instance_double(TasteTester::Tunnel, :run => true)
       tunnel2 = instance_double(TasteTester::Tunnel, :run => true)

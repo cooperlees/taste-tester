@@ -238,7 +238,9 @@ module TasteTester
         hosts.each do |hostname|
           TasteTester::Tunnel.kill(hostname)
         rescue StandardError => e
-          logger.error("Failed cleaning up tunnel on #{hostname}: #{e}")
+          logger.error(
+            "Failed cleaning up tunnel on #{hostname} during shutdown: #{e}",
+          )
         end
 
         signal_handlers.each do |signal_name, previous_handler|
