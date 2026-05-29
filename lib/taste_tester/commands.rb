@@ -206,11 +206,11 @@ module TasteTester
         exit(1)
       end
 
+      # Make sure the local taste-tester server is up with the latest
+      # cookbooks/roles uploaded, starting it if it isn't already running.
+      upload unless TasteTester::Server.running?
+
       server = TasteTester::Server.new
-      unless TasteTester::Server.running? && server.port
-        logger.error('Local taste-tester server not running')
-        exit(1)
-      end
 
       signal_names = %w{INT TERM HUP QUIT}
       signal_handlers = {}

@@ -113,9 +113,10 @@ MODES:
     machine and verify the changes you are trying to make are actually present.
 
   run-reverse-tunnels
-    Set up reverse SSH tunnels from each server in '-s' to your locally running
-    taste-tester server and wait until terminated. On shutdown (Ctrl+C, SIGTERM,
-    etc.), all tunnels are cleaned up.
+    Set up reverse SSH tunnels from each server in '-s' to your local
+    taste-tester server and wait until terminated. If the local server isn't
+    already running, it will be started and the latest cookbooks/roles uploaded
+    first. On shutdown (Ctrl+C, SIGTERM, etc.), all tunnels are cleaned up.
 
   stop
     You probably don't want this. It will shutdown the chef-zero server on

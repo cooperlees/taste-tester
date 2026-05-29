@@ -32,22 +32,37 @@ describe TasteTester::Commands do
     TasteTester::Config.restore(config_hash)
   end
 
-  describe '.run_reverse_tunnels' do
-    it 'errors when local taste-tester server is not running' do
+  describe '#run_reverse_tunnels' do
+    it 'starts the local server and uploads when it is not running' do
       TasteTester::Config.servers(['host1'])
-      mock_server = instance_double(TasteTester::Server, :port => nil)
+      mock_server = instance_double(TasteTester::Server, :port => 1234)
+      tunnel1 = instance_double(TasteTester::Tunnel, :run => true)
+      signal_handlers = {}
+
       allow(TasteTester::Server).to receive(:new).and_return(mock_server)
       allow(TasteTester::Server).to receive(:running?).and_return(false)
+      allow(TasteTester::Tunnel).to receive(:new).with(
+        'host1',
+        mock_server,
+      ).and_return(tunnel1)
+      allow(TasteTester::Tunnel).to receive(:kill).with('host1')
+      allow(Signal).to receive(:trap) do |signal_name, signal_handler|
+        if signal_handler.respond_to?(:call)
+          signal_handlers[signal_name] = signal_handler
+        end
+        'DEFAULT'
+      end
+      allow(TasteTester::Commands).to receive(:sleep) do
+        signal_handlers['INT'].call
+        nil
+      end
 
-      expect(TasteTester::Logging.logger).to receive(:error).with(
-        'Local taste-tester server not running',
-      )
-      expect { TasteTester::Commands.run_reverse_tunnels }.to raise_error(
-        SystemExit,
-      ) { |error| expect(error.status).to eq(1) }
+      expect(TasteTester::Commands).to receive(:upload)
+
+      TasteTester::Commands.run_reverse_tunnels
     end
 
-    it 'starts tunnels and cleans them up on signal' do
+    it 'does not re-upload when the local server is already running' do
       TasteTester::Config.servers(%w{host1 host2})
       mock_server = instance_double(TasteTester::Server, :port => 1234)
       tunnel1 = instance_double(TasteTester::Tunnel, :run => true)
@@ -56,6 +71,7 @@ describe TasteTester::Commands do
 
       allow(TasteTester::Server).to receive(:new).and_return(mock_server)
       allow(TasteTester::Server).to receive(:running?).and_return(true)
+      expect(TasteTester::Commands).not_to receive(:upload)
       allow(TasteTester::Tunnel).to receive(:new).with(
         'host1',
         mock_server,
